@@ -23,6 +23,11 @@ public class PacStudentController : MonoBehaviour
     [SerializeField]
     public AudioSource audioSourceeatingpellet;
 
+    [SerializeField]
+    private ParticleSystem dustEffect;
+
+    private float dusteffectYPos = -0.15f;
+
 
 
     private void Awake()
@@ -34,6 +39,7 @@ public class PacStudentController : MonoBehaviour
     private void Start()
     {
         animator.Play("bunright");
+        dustEffect.transform.localPosition = new Vector3(0, dusteffectYPos, 0);
 
        
     }
@@ -105,16 +111,66 @@ public class PacStudentController : MonoBehaviour
             }
         }
 
-        if (dir == Vector2Int.up) animator.Play("bunup");
-        else if (dir == Vector2Int.down) animator.Play("bundown");
-        else if (dir == Vector2Int.left) animator.Play("bunleft");
-        else if (dir == Vector2Int.right) animator.Play("bunright");
+        if (dir == Vector2Int.up)
+        {
+            animator.Play("bunup");
+           
+        }
+        else if (dir == Vector2Int.down)
+        {
+            animator.Play("bundown");
+            
+        }
+        else if (dir == Vector2Int.left)
+        {
+            animator.Play("bunleft");
+            
+        }
+        else if (dir == Vector2Int.right)
+        {
+            animator.Play("bunright");
+            
+        }
+
+
+ 
+
+
+       
+            if (dir == Vector2Int.up)
+                dustEffect.transform.localRotation = Quaternion.Euler(0, 0, -90); 
+            else if (dir == Vector2Int.down)
+                dustEffect.transform.localRotation = Quaternion.Euler(0, 0, 90); 
+            else if (dir == Vector2Int.left)
+                dustEffect.transform.localRotation = Quaternion.Euler(0, 0, 0); 
+            else if (dir == Vector2Int.right)
+                dustEffect.transform.localRotation = Quaternion.Euler(0, 0, 180);
+
+
+
+
+        Vector3 offset = Vector3.zero;
+        float distance = 0.15f;
+
+        if (dir == Vector2Int.up) offset = new Vector3(0, dusteffectYPos - distance, 0);
+        else if (dir == Vector2Int.down) offset = new Vector3(0, dusteffectYPos + distance, 0);
+        else if (dir == Vector2Int.left) offset = new Vector3(0, dusteffectYPos, 0);
+        else if (dir == Vector2Int.right) offset = new Vector3(0, dusteffectYPos, 0);
+
+        dustEffect.transform.localPosition = offset;
+
+
+
+
 
         if (tweener.AddTween(transform, transform.position, newTarget, moveDuration))
         {
             audioSourcemoving.Play();
             targetPos = newTarget;
             isMoving = true;
+
+            if (!dustEffect.isPlaying) dustEffect.Play();
+
             StartCoroutine(WaitForTween(moveDuration));
             return true;
         }
@@ -127,6 +183,8 @@ public class PacStudentController : MonoBehaviour
         yield return new WaitForSeconds(duration);
         audioSourcemoving.Pause();
         isMoving = false;
+
+        if (dustEffect.isPlaying) dustEffect.Pause();
 
        
     }
