@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: Layer 1_sprite_mapfinal35_0
+  m_Name: GhostDoorTile
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 5314674359102619236, guid: 8f3391ee8d41b414eaf248540811ba28, type: 3}
+  m_Sprite: {fileID: -5829407540559900882, guid: 2e18066187e9e2f40a2c8c70c2e9d99a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
