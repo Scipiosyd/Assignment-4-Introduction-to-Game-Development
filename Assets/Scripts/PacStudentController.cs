@@ -1,59 +1,135 @@
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PacStudentController : MonoBehaviour
 {
     [Header("Movement Settings")]
-    public float moveDuration = 0.2f;
-    public float tileSize = 0.3f;
+    public float moveDuration = 0.2f;      // Lerp duration for moving one tile
+    public Tweener tweener;
 
-    [Header("Collision")]
-    public LayerMask obstacleLayer; // walls/inner walls prefabs should be in this layer
+    private Vector3 targetPos;
+    private bool isMoving = false;
+    private Rigidbody2D rb2D;
 
-    private Tweener tweener;
+    private Vector2Int currentInput = Vector2Int.zero;
+    private Vector2Int lastInput = Vector2Int.zero;
+    [SerializeField]
+    public Animator animator;
+
+
+    [SerializeField]
+    public AudioSource audioSourcemoving;
+    [SerializeField]
+    public AudioSource audioSourceeatingpellet;
+
+
 
     private void Awake()
     {
-        tweener = GetComponent<Tweener>();
-        if (tweener == null)
-        {
-            tweener = gameObject.AddComponent<Tweener>();
-        }
+        rb2D = GetComponent<Rigidbody2D>();
+        targetPos = transform.position;
+    }
+
+    private void Start()
+    {
+        animator.Play("bunright");
+
+       
     }
 
     private void Update()
     {
-        // Only accept new input if not currently tweening
-        if (tweener.TweenExists(transform)) return;
-
+        if (isMoving) return;
+       
+        
         Vector2Int dir = Vector2Int.zero;
-
-        if (Input.GetKeyDown(KeyCode.W)) dir = Vector2Int.up;
-        else if (Input.GetKeyDown(KeyCode.S)) dir = Vector2Int.down;
-        else if (Input.GetKeyDown(KeyCode.A)) dir = Vector2Int.left;
-        else if (Input.GetKeyDown(KeyCode.D)) dir = Vector2Int.right;
-
-        if (dir != Vector2Int.zero)
+        if (Input.GetKey(KeyCode.W))
         {
-            TryMove(dir);
+            
+            lastInput = Vector2Int.up;
+
+        }
+        else if (Input.GetKey(KeyCode.S))
+        {
+            
+            lastInput = Vector2Int.down;
+        }
+        else if (Input.GetKey(KeyCode.A))
+        {
+          
+            lastInput = Vector2Int.left;
+        }
+        else if (Input.GetKey(KeyCode.D))
+        {
+            
+            lastInput = Vector2Int.right;
+        }
+        if (!isMoving)
+        {
+            if (TryMove(lastInput))
+            {
+                currentInput = lastInput;
+            }
+
+            else if (TryMove(currentInput))
+            {
+
+            }
         }
     }
 
-    private void TryMove(Vector2Int dir)
+    private bool TryMove(Vector2Int dir)
     {
-        Vector3 targetPos = transform.position + new Vector3(dir.x * tileSize, dir.y * tileSize, 0);
 
-        // Check for wall collision
-        if (Physics2D.OverlapBox(targetPos, Vector2.one * tileSize * 0.8f, 0f, obstacleLayer) != null)
+
+        if (dir == Vector2Int.zero) return false;
+
+        Vector3 newTarget = targetPos + new Vector3(dir.x * 0.3f, dir.y * 0.3f, 0);
+
+        Collider2D hit = Physics2D.OverlapBox(newTarget, new Vector2(0.1f, 0.1f), 0f);
+    
+        if (hit != null)
         {
-            return; // Blocked
+            if (hit.CompareTag("Ghostdoor"))
+            {
+                audioSourcemoving.Pause();
+                return false;
+
+            }
+
+            else if (hit.CompareTag("Wall"))
+            {
+                audioSourcemoving.Pause();
+                return false;
+            }
         }
 
-        MoveTo(targetPos);
+        if (dir == Vector2Int.up) animator.Play("bunup");
+        else if (dir == Vector2Int.down) animator.Play("bundown");
+        else if (dir == Vector2Int.left) animator.Play("bunleft");
+        else if (dir == Vector2Int.right) animator.Play("bunright");
+
+        if (tweener.AddTween(transform, transform.position, newTarget, moveDuration))
+        {
+            audioSourcemoving.Play();
+            targetPos = newTarget;
+            isMoving = true;
+            StartCoroutine(WaitForTween(moveDuration));
+            return true;
+        }
+
+        return false;
     }
 
-    private void MoveTo(Vector3 targetPos)
+    private IEnumerator WaitForTween(float duration)
     {
-        // Use existing Tweener
-        tweener.AddTween(transform, transform.position, targetPos, moveDuration);
+        yield return new WaitForSeconds(duration);
+        audioSourcemoving.Pause();
+        isMoving = false;
+
+       
     }
+
 }
+  
