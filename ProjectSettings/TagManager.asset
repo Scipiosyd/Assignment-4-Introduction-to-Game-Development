@@ -6,21 +6,23 @@ TagManager:
   tags:
   - Ghostdoor
   - Wall
+  - PowerPellet
+  - Pellet
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Walkable
   - Water
   - UI
   - above ui
-  - 
-  - 
+  - Teleporter
+  - Pellet
   - Wall
   - GhostWall
   - 
   - 
-  - 
+  - Cherry
   - 
   - 
   - 
