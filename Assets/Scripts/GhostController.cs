@@ -9,13 +9,14 @@ public class GhostController : MonoBehaviour
 
     private Animator animator;
 
-    private enum KnightState { Normal, Scared, Recovering }
+    private enum KnightState { Normal, Scared, Recovering, Dead}
     private KnightState currentState = KnightState.Normal;
 
     private Vector2 knightstartPos;
     private Vector2 movementDirection = Vector2.down;
 
     private Coroutine scaredCoroutine;
+    private Coroutine deadCoroutine;
 
     
 
@@ -53,10 +54,32 @@ public class GhostController : MonoBehaviour
         scaredCoroutine = StartCoroutine(ScaredTime());
     }
 
-    public bool isScared()
+    public bool IsScared()
     {
         return currentState == KnightState.Scared;
     }
+
+
+    public void KnightDead()
+    {
+        if(deadCoroutine  != null)
+        {
+            StopCoroutine(deadCoroutine);
+        }
+
+        deadCoroutine = StartCoroutine(DeadTime());
+    }
+
+    public bool IsDead()
+    {
+        return currentState == KnightState.Dead;
+    }
+
+    public bool IsRecovering()
+    {
+        return currentState == KnightState.Recovering;
+    }
+
 
 
 
@@ -72,6 +95,28 @@ public class GhostController : MonoBehaviour
 
         currentState = KnightState.Normal;
         scaredCoroutine = null;
+    }
+
+    private IEnumerator DeadTime()
+    {
+        currentState = KnightState.Dead;
+        animator.Play("knightdead");
+        yield return new WaitForSeconds(3f);
+
+        if(InGameCounterManager.instance.Knightscaredremainingtime <= 0)
+        {
+            currentState = KnightState.Normal;
+        }
+
+        else
+        {
+            currentState = KnightState.Recovering;
+            yield return new WaitForSeconds(3f);
+
+            currentState = KnightState.Normal;
+        }
+
+        deadCoroutine = null;
     }
 
 

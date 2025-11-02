@@ -22,6 +22,7 @@ public class InGameCounterManager : MonoBehaviour
     string scoreFormat = null;
 
 
+    public bool IsPaused { get; private set; } = false;
 
     private void Awake()
     {
@@ -35,6 +36,15 @@ public class InGameCounterManager : MonoBehaviour
     private float knightscaredremaining = 0f;
     private bool knightisscared = false;
 
+    private float knightdeadremaining = 0f;
+    private bool knightdead = false;
+
+
+    public float Knightscaredremainingtime
+    {
+        get {  return knightscaredremaining; } 
+
+    }
 
     private void Start()
     {
@@ -48,6 +58,7 @@ public class InGameCounterManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (IsPaused) return;
         elapsedTime += Time.deltaTime;
          minutes = Mathf.FloorToInt(elapsedTime / 60);
          seconds = Mathf.FloorToInt(elapsedTime % 60);
@@ -77,6 +88,9 @@ public class InGameCounterManager : MonoBehaviour
             }
         }
     }
+
+    public void PauseTimer() => IsPaused = true;
+    public void ResumeTimer() => IsPaused = false;
 
 
     public void GhostTimer(float duration)

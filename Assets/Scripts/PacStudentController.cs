@@ -34,10 +34,17 @@ public class PacStudentController : MonoBehaviour
     [SerializeField]
     private ParticleSystem wallEffect;
 
+
+    [SerializeField]
+    private ParticleSystem bloodEffect;
+
     //Collisions
 
     [SerializeField]
     private LayerMask collisionLayers;
+
+    [SerializeField]
+    private LayerMask ghostdoorLayer;
 
     [SerializeField]
     private LayerMask teleporterLayer;
@@ -149,6 +156,7 @@ public class PacStudentController : MonoBehaviour
         Vector3 newTarget = targetPos + new Vector3(dir.x * 0.3f, dir.y * 0.3f, 0);
 
         Collider2D hit = Physics2D.OverlapBox(newTarget, new Vector2(0.1f, 0.1f), 0f, collisionLayers);
+        Collider2D ghostdoorhit = Physics2D.OverlapBox(newTarget, new Vector2(0.1f, 0.1f), 0f, ghostdoorLayer);
 
         Collider2D teleporter = Physics2D.OverlapBox(newTarget, new Vector2(0.1f, 0.1f), 0f, teleporterLayer);
 
@@ -165,37 +173,39 @@ public class PacStudentController : MonoBehaviour
 
 
 
-        if(knighthit != null)
+        if (knighthit != null)
         {
-            foreach (var knight in knights)
+            GhostController hitKnight = knighthit.GetComponent<GhostController>();
+            if (hitKnight == null) return false; // safety
+
+            if (hitKnight.IsScared())
             {
-                if (!knight.isScared())  
+                // Knight is scared → go into dead state
+                InGameCounterManager.instance.AddPoint(300);
+                hitKnight.KnightDead(); // start dead animation and logic
+            }
+            else if(!hitKnight.IsScared() && !hitKnight.IsRecovering() && !hitKnight.IsDead())
+            {
+                // Knight is not scared → player dies
+                isMoving = true;
+                tweener.CancelTween(transform);
+
+                foreach (var k in knights)
                 {
-                    
-                    isMoving = true;
-                    tweener.CancelTween(transform);
-
-                    
-                    foreach (var k in knights)
-                    {
-                        Animator knightAnimator = k.GetComponent<Animator>();
-                        if (knightAnimator != null)
-                            knightAnimator.speed = 0;
-                    }
-
-                 
-                    StartCoroutine(DeathScene(3f));
-
-                    
-                    return false;
+                    Animator knightAnimator = k.GetComponent<Animator>();
+                    if (knightAnimator != null)
+                        knightAnimator.speed = 0;
                 }
+
+                StartCoroutine(DeathScene(3f));
+                return false;
             }
 
-        }
+            }
 
 
 
-        if (pellethit != null && !pellethit.CompareTag("PowerPellet")) {
+            if (pellethit != null && !pellethit.CompareTag("PowerPellet")) {
 
             InGameCounterManager.instance.AddPoint(10);
                 Destroy(pellethit.gameObject);
@@ -236,14 +246,9 @@ public class PacStudentController : MonoBehaviour
 
             int hitLayer = hit.gameObject.layer;
 
-            if (hit.CompareTag("Ghostdoor"))
-            {
-                audioSourcemoving.Pause();
-                return false;
+           
 
-            }
-
-            else if ((collisionLayers.value & (1 << hitLayer)) != 0 && hitLayer == LayerMask.NameToLayer("Wall"))
+             if ((collisionLayers.value & (1 << hitLayer)) != 0 && hitLayer == LayerMask.NameToLayer("Wall"))
             {
                 
                 wallEffect.transform.position = newTarget;
@@ -254,6 +259,19 @@ public class PacStudentController : MonoBehaviour
                 // stop it again after a short delay
                 StartCoroutine(StopWallEffectAfter(0.5f));
                 return false;
+            }
+        }
+
+
+        if (ghostdoorhit != null)
+        {
+            int ghosthitLayer = ghostdoorhit.gameObject.layer;
+
+            if ((ghostdoorLayer.value & (1 << ghosthitLayer)) != 0 && ghosthitLayer == LayerMask.NameToLayer("GhostWall"))
+            {
+                audioSourcemoving.Pause();
+                return false;
+
             }
         }
 
@@ -380,7 +398,10 @@ public class PacStudentController : MonoBehaviour
     if (isDead) yield break;
     isDead = true;
 
+    bloodEffect.Play();
+
     animator.Play("bundead");
+
     isMoving = true;
 
     tweener.CancelTween(transform);
@@ -396,6 +417,8 @@ public class PacStudentController : MonoBehaviour
         if (knightAnimator != null)
             knightAnimator.speed = 1;
     }
+
+    bloodEffect.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
 
     lifecounter.instance.removeLife();
     LevelController.Instance.ResetEverything();
@@ -419,6 +442,7 @@ public class PacStudentController : MonoBehaviour
         animator.Play("bunright");
 
         dustEffect.Stop();
+
         audioSourcemoving.Pause();
 
 
