@@ -3737,6 +3737,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3118034851494625299, guid: f088d16bec33bdf45a01015285d98420, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5598646331304793108}
+    - targetCorrespondingSourceObject: {fileID: 3118034851494625299, guid: f088d16bec33bdf45a01015285d98420, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5598646331304793109}
   m_SourcePrefab: {fileID: 100100000, guid: f088d16bec33bdf45a01015285d98420, type: 3}
 --- !u!224 &5598646331304793104 stripped
 RectTransform:
@@ -3759,6 +3762,18 @@ MonoBehaviour:
   timerText: {fileID: 1595870364}
   scoreText: {fileID: 0}
   timeText: {fileID: 0}
+--- !u!114 &5598646331304793109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2024758989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1832cbba6afb1264f900b6c9cebad2f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

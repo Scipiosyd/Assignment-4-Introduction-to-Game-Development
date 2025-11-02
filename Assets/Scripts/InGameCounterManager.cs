@@ -22,6 +22,8 @@ public class InGameCounterManager : MonoBehaviour
     string scoreFormat = null;
 
 
+    public int GetScore {  get { return score; } }
+
     public bool IsPaused { get; private set; } = false;
 
     private void Awake()

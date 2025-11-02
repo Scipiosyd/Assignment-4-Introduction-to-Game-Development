@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 
 
-public class Score : MonoBehaviour
+public class CounterManager : MonoBehaviour
 {
     
  
@@ -19,12 +19,7 @@ public class Score : MonoBehaviour
     int minutes = 0;
     string timerFormat = null;
 
-    //Level 1
-    public Text scoreText;
-    public Text timeText;
-    int score = 0;
-    string scoreFormat = null;
-
+    
   
     
     
@@ -37,6 +32,7 @@ public class Score : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        highscore = PlayerPrefs.GetInt("HighScore");
         highscoreText.text = "HIGHSCORE: " + highscore.ToString();
         //milliseconds = Mathf.FloorToInt(milliseconds);
         //seconds = Mathf.FloorToInt(seconds);
@@ -57,11 +53,9 @@ public class Score : MonoBehaviour
         int seconds = Mathf.FloorToInt(elapsedTime % 60);
         int milliseconds = Mathf.FloorToInt((elapsedTime % 1f) * 1000f);
         timerFormat = string.Format("{0:00}:{1:00}:{2:000}", minutes, seconds, milliseconds);
-        timeText.text = "TIME \n" + timerFormat;
+        timerText.text = "TIME \n" + timerFormat;
 
-        scoreFormat = string.Format("{000000}", score); //fix
-        scoreText.text = "SCORE \n" + scoreFormat;
-
+        
 
 
     }

@@ -291,6 +291,7 @@ GameObject:
   m_Component:
   - component: {fileID: 171842631}
   - component: {fileID: 171842632}
+  - component: {fileID: 171842633}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -336,6 +337,19 @@ MonoBehaviour:
   - {fileID: 1035771105}
   counter: {fileID: 1051844903}
   countdownInterval: 1
+--- !u!114 &171842633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 171842630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b90a57d8036da614681d62be0dc3e0be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scoreText: {fileID: 61542841}
 --- !u!1 &275614139 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7737047617791147747, guid: b75d06f078cd6404cb44af4468e1f48b, type: 3}
@@ -6103,8 +6117,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -0.0000076293945}
-  m_SizeDelta: {x: 1933.1, y: 1007}
+  m_AnchoredPosition: {x: -0.015106, y: 0}
+  m_SizeDelta: {x: 3840, y: 2160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &823979087
 CanvasRenderer:
@@ -6136,7 +6150,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 100
+    m_FontSize: 200
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -7435,8 +7449,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 807, y: 454}
+  m_AnchoredPosition: {x: -0.000061035, y: 0}
+  m_SizeDelta: {x: 3840, y: 2160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1861231449
 MonoBehaviour:
@@ -7639,8 +7653,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.00000095367, y: 0}
-  m_SizeDelta: {x: 942.3, y: 836.1}
+  m_AnchoredPosition: {x: 0.0073242, y: -0.0099792}
+  m_SizeDelta: {x: 3840, y: 2160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2101834502
 MonoBehaviour:
@@ -7664,7 +7678,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 100
+    m_FontSize: 200
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0

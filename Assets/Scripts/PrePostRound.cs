@@ -91,6 +91,8 @@ public class PrePostRound : MonoBehaviour
         screenOverlay.SetActive(true);
         gameoverText.text = "Game Over";
 
+        SaveScore.Instance.saveScore();
+
         yield return new WaitForSeconds(duration);
         
         SceneManager.LoadScene(0);
