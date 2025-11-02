@@ -52,6 +52,8 @@ public class PacStudentController : MonoBehaviour
     [SerializeField]
     private LayerMask pelletLayer;
 
+   
+
     [SerializeField]
     private LayerMask cherryLayer;
 
@@ -84,11 +86,13 @@ public class PacStudentController : MonoBehaviour
     private bool isDead;
 
     //Counter
-
+    int pelletcounter = 217;
+    int knightlivescounter = 3;
 
 
     private Coroutine moveCoroutine;
     private Coroutine wallEffectCoroutine;
+    private Coroutine endLevelCoroutine;
 
     private void Awake()
     {
@@ -186,7 +190,7 @@ public class PacStudentController : MonoBehaviour
             }
             else if(!hitKnight.IsScared() && !hitKnight.IsRecovering() && !hitKnight.IsDead())
             {
-                // Knight is not scared → player dies
+                
                 isMoving = true;
                 tweener.CancelTween(transform);
 
@@ -197,8 +201,11 @@ public class PacStudentController : MonoBehaviour
                         knightAnimator.speed = 0;
                 }
 
+                
+
                 StartCoroutine(DeathScene(3f));
-                return false;
+                
+                    return false;
             }
 
             }
@@ -207,8 +214,25 @@ public class PacStudentController : MonoBehaviour
 
             if (pellethit != null && !pellethit.CompareTag("PowerPellet")) {
 
-            InGameCounterManager.instance.AddPoint(10);
+            if (pelletcounter > 1)
+            {
+
+                InGameCounterManager.instance.AddPoint(10);
+                pelletcounter -= 1;
                 Destroy(pellethit.gameObject);
+            }
+
+            else
+            {
+                InGameCounterManager.instance.AddPoint(10);
+                pelletcounter -= 1;
+                Destroy(pellethit.gameObject);
+                StartCoroutine(EndLevel(3f));
+
+
+            }
+
+
             }
 
         if(pellethit != null && pellethit.CompareTag("PowerPellet"))
@@ -219,7 +243,7 @@ public class PacStudentController : MonoBehaviour
             foreach (var knight in knights)
             {
 
-                //if(knight ! dead)
+                
                 knight.KnightScared();
                 
             }
@@ -395,36 +419,56 @@ public class PacStudentController : MonoBehaviour
 
     private IEnumerator DeathScene(float duration)
 {
-    if (isDead) yield break;
-    isDead = true;
 
-    bloodEffect.Play();
+            if (isDead) yield break;
+            isDead = true;
 
-    animator.Play("bundead");
+            bloodEffect.Play();
 
-    isMoving = true;
+            animator.Play("bundead");
 
-    tweener.CancelTween(transform);
-    if (moveCoroutine != null) StopCoroutine(moveCoroutine);
+            isMoving = true;
 
-    yield return new WaitForSeconds(duration);
+            tweener.CancelTween(transform);
+            if (moveCoroutine != null) StopCoroutine(moveCoroutine);
 
-    isMoving = false;
+            yield return new WaitForSeconds(duration);
 
-    foreach (var knight in knights)
-    {
-        Animator knightAnimator = knight.GetComponent<Animator>();
-        if (knightAnimator != null)
-            knightAnimator.speed = 1;
-    }
+            isMoving = false;
 
-    bloodEffect.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+            foreach (var knight in knights)
+            {
+                Animator knightAnimator = knight.GetComponent<Animator>();
+                if (knightAnimator != null)
+                    knightAnimator.speed = 1;
+            }
 
-    lifecounter.instance.removeLife();
-    LevelController.Instance.ResetEverything();
+            bloodEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
-    isDead = false;
+            lifecounter.instance.removeLife();
+            knightlivescounter--;
+
+
+        if (knightlivescounter > 0)
+        {
+            LevelController.Instance.ResetEverything();
+
+            isDead = false;
+        }
+        else
+        {
+            StartCoroutine(EndLevel(2));
+        }
 }
+
+    private IEnumerator EndLevel(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+
+        PrePostRound.instance.GameOver();
+
+
+    }
 
 
 

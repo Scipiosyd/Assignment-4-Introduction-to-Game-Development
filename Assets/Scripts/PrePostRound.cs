@@ -1,12 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PrePostRound : MonoBehaviour
 {
-    
+
+    public static PrePostRound instance;
+
     public Text countdownText;
+    public Text gameoverText;
     public GameObject screenOverlay; 
 
    
@@ -17,6 +21,11 @@ public class PrePostRound : MonoBehaviour
 
 
     public float countdownInterval = 1f; // 1 second per number
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     private void Start()
     {
@@ -48,7 +57,7 @@ public class PrePostRound : MonoBehaviour
         SetGameplayActive(true);
     }
 
-    private void SetGameplayActive(bool active)
+    public void SetGameplayActive(bool active)
     {
         
         player.enabled = active;
@@ -67,5 +76,23 @@ public class PrePostRound : MonoBehaviour
         {
             knight.enabled = active;
          }
+    }
+
+    public void GameOver()
+    {
+        SetGameplayActive(false);
+        
+        StartCoroutine(EndScreen(3f));
+
+    }
+
+    private IEnumerator EndScreen(float duration)
+    {
+        screenOverlay.SetActive(true);
+        gameoverText.text = "Game Over";
+
+        yield return new WaitForSeconds(duration);
+        
+        SceneManager.LoadScene(0);
     }
 }
