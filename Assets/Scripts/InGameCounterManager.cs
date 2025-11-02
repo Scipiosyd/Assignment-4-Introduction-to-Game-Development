@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class InGameCounterManager : MonoBehaviour
 {
 
-
+    public static InGameCounterManager instance;
    
     int milliseconds = 0;
     int seconds = 0;
@@ -16,27 +16,34 @@ public class InGameCounterManager : MonoBehaviour
     //Level 1
     public Text scoreText;
     public Text timeText;
+    public Text ScaredText;
+    public Text ScaredtimerText;
     int score = 0;
     string scoreFormat = null;
 
 
 
-
+    private void Awake()
+    {
+       instance = this;
+    }
 
 
 
     float elapsedTime;
 
+    private float knightscaredremaining = 0f;
+    private bool knightisscared = false;
 
-    // Start is called before the first frame update
-    void Start()
+
+    private void Start()
     {
         
-
-
-
+        scoreText.text = "SCORE \n" + score.ToString();
+        ScaredText.text = "SCARED TIME";
 
     }
+
 
     // Update is called once per frame
     void Update()
@@ -48,12 +55,62 @@ public class InGameCounterManager : MonoBehaviour
         timerFormat = string.Format("{0:00}:{1:00}:{2:000}", minutes, seconds, milliseconds);
         timeText.text = "TIME \n" + timerFormat;
 
-        scoreFormat = string.Format("{000000}", score); //fix
-        scoreText.text = "SCORE \n" + scoreFormat;
+        if (knightisscared)
+        {
+
+            knightscaredremaining -= Time.deltaTime;
+
+            if (knightscaredremaining <= 0f)
+            {
+                knightscaredremaining = 0f;
+                knightisscared = false;
+                ScaredtimerText.gameObject.SetActive(false);
+            }
 
 
 
+
+            else
+            {
+                ScaredtimerText.gameObject.SetActive(true);
+                ScaredtimerText.text = Mathf.FloorToInt(knightscaredremaining % 60).ToString();
+            }
+        }
     }
+
+
+    public void GhostTimer(float duration)
+    {
+        knightscaredremaining = duration;
+        knightisscared = true;
+        ScaredtimerText.gameObject.SetActive(true);
+    }
+
+
+    public void AddPoint(int points)
+    {
+        
+        //scoreFormat = string.Format("{000000}", points); //fix
+
+        score += points;
+        
+        scoreText.text = "SCORE \n" + score.ToString("000000");
+    }
+
+
+    public void ResetCounters()
+    {
+        elapsedTime = 0f;
+        timeText.text = "TIME \n00:00:00";
+
+        knightscaredremaining = 0f;
+        knightisscared = false;
+        ScaredtimerText.gameObject.SetActive(false);
+    }
+
+
+
+
 }
 
 

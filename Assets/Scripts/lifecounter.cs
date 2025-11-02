@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class lifecounter : MonoBehaviour
 {
+
+    public static lifecounter instance;
 
     [SerializeField]
     private float lifeimagewidth = 54f;
@@ -15,13 +18,19 @@ public class lifecounter : MonoBehaviour
 
     private RectTransform rect;
 
+    public UnityEvent NomoreLives;
+
     public int Currentlives
     {
         get => currentlives;
         private set
         {
+            if ((value < 0))
+            {
+                NomoreLives?.Invoke();
+            }
             currentlives = Mathf.Clamp(value, 0, TotalLives);
-            rect.sizeDelta = new Vector2(lifeimagewidth * currentlives, rect.sizeDelta.y);
+            AdjustImageWidth();
         }
 
     }
@@ -29,7 +38,22 @@ public class lifecounter : MonoBehaviour
     private void Awake()
     {
         rect = transform  as RectTransform;
+        AdjustImageWidth ();
+
+        instance = this;
     }
+
+    public void removeLife(int num = 1)
+    {
+        Currentlives -= num;
+    }
+
+
+    private void AdjustImageWidth()
+    {
+        rect.sizeDelta = new Vector2(lifeimagewidth * currentlives, rect.sizeDelta.y);
+    }
+    
 
     // Start is called before the first frame update
     void Start()

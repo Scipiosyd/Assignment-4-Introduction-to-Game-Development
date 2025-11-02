@@ -8,6 +8,10 @@ TagManager:
   - Wall
   - PowerPellet
   - Pellet
+  - Cherry
+  - Ghost
+  - PelletTile
+  - PowerPelletTile
   layers:
   - Default
   - TransparentFX
@@ -20,7 +24,7 @@ TagManager:
   - Pellet
   - Wall
   - GhostWall
-  - 
+  - Ghosts
   - 
   - Cherry
   - 

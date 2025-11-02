@@ -1,63 +1,149 @@
 using UnityEngine;
 
 #if UNITY_EDITOR
-[ExecuteAlways]
+//[ExecuteAlways]
 public class WallGizmoDrawer : MonoBehaviour
 {
+    [Header("Layers and Prefabs")]
     public LayerMask wallLayer;
     public LayerMask pelletLayer;
     public LayerMask walkableLayer;
-    public Vector2 gizmoSize = new Vector2(0.3f, 0.3f); // match your tile size
-    [SerializeField]
-    public Transform gridParent;  
+    public Transform gridParent;
+    public GameObject pelletPrefab;
+
     public string wallLayerName = "Wall";
     public string pelletLayerName = "Pellet";
     public string walkableLayerName = "Walkable";
 
-    // Prefab names to check
-    private string[] wallNames = new string[] { "OuterWall", "InnerWall", "OuterCorner", "InnerCorner" };
+    [Header("Gizmo Settings")]
+    public Vector2 gizmoSize = new Vector2(0.3f, 0.3f);
+
+    [Header("Pellet Spawning")]
+    public float checkRadius = 0.1f;
+
+    // Cache transforms to avoid repeated allocations
+    private Transform[] cachedChildren;
+
+    // Prefab names for walls
+    private readonly string[] wallNames = { "OuterWall", "InnerWall", "OuterCorner", "InnerCorner" };
+
+    // ------------------- Editor Methods -------------------
+    [ContextMenu("Cache Grid Children")]
+    public void CacheChildren()
+    {
+        if (gridParent != null)
+        {
+            cachedChildren = gridParent.GetComponentsInChildren<Transform>(true);
+        }
+        else
+        {
+            cachedChildren = new Transform[0];
+        }
+    }
 
     [ContextMenu("Set Wall Layers")]
     public void SetWallLayers()
     {
-        if (gridParent == null)
-        {
-            
-            return;
-        }
+        if (cachedChildren == null) CacheChildren();
 
-        int wallLayer = LayerMask.NameToLayer(wallLayerName);
-        if (wallLayer == -1)
-        {
-            
-            return;
-        }
+        int wallLayerIndex = LayerMask.NameToLayer(wallLayerName);
+        if (wallLayerIndex == -1) return;
 
-        foreach (Transform child in gridParent)
+        foreach (var child in cachedChildren)
         {
-            foreach (string wallName in wallNames)
+            foreach (var name in wallNames)
             {
-                if (child.name.Contains(wallName))
+                if (child.name.Contains(name))
                 {
-                    child.gameObject.layer = wallLayer;
-                    
-                    foreach (Transform grandChild in child.GetComponentsInChildren<Transform>(true))
-                    {
-                        grandChild.gameObject.layer = wallLayer;
-                    }
+                    child.gameObject.layer = wallLayerIndex;
+                    foreach (var grandChild in child.GetComponentsInChildren<Transform>(true))
+                        grandChild.gameObject.layer = wallLayerIndex;
                     break;
                 }
             }
         }
-
-       
     }
 
-    [ContextMenu("Add Colliders and Layers to Pellets")]
-    public void AddPelletColliders()
+    [ContextMenu("Set Floor Tiles as Walkable")]
+    public void SetWalkableTiles()
     {
-        if (gridParent == null)
-            return;
+        if (cachedChildren == null) CacheChildren();
+
+        int walkableLayerIndex = LayerMask.NameToLayer(walkableLayerName);
+        if (walkableLayerIndex == -1) return;
+
+        foreach (var child in cachedChildren)
+        {
+            if (child.name.Contains("Floor"))
+            {
+                child.gameObject.layer = walkableLayerIndex;
+            }
+        }
+    }
+
+    //[ContextMenu("Add Colliders and Layers to Pellets")]
+    //public void AddPelletColliders()
+    //{
+    //    if (cachedChildren == null) CacheChildren();
+
+    //    int pelletLayerIndex = LayerMask.NameToLayer(pelletLayerName);
+    //    if (pelletLayerIndex == -1)
+    //    {
+    //        Debug.LogError($"Layer '{pelletLayerName}' does not exist!");
+    //        return;
+    //    }
+
+    //    foreach (var child in cachedChildren)
+    //    {
+    //        if (child.name.Contains("Pellet"))
+    //        {
+    //            child.gameObject.layer = pelletLayerIndex;
+
+    //            BoxCollider2D bc = child.GetComponent<BoxCollider2D>();
+    //            if (bc == null)
+    //            {
+    //                bc = child.gameObject.AddComponent<BoxCollider2D>();
+    //            }
+    //            bc.isTrigger = true;
+    //        }
+    //    }
+    //}
+
+    [ContextMenu("Spawn Pellets On Walkable Tiles")]
+    public void SpawnPelletsOnWalkableTiles()
+    {
+        if (cachedChildren == null) CacheChildren();
+        if (pelletPrefab == null) return;
+
+        int walkableLayerIndex = LayerMask.NameToLayer(walkableLayerName);
+        int wallLayerIndex = LayerMask.NameToLayer(wallLayerName);
+        int pelletLayerIndex = LayerMask.NameToLayer(pelletLayerName);
+
+        int spawnCount = 0;
+
+        foreach (var tile in cachedChildren)
+        {
+            if (tile.gameObject.layer != walkableLayerIndex) continue;
+
+            Collider2D hit = Physics2D.OverlapCircle(tile.position, checkRadius, wallLayer | pelletLayer);
+            if (hit != null) continue;
+
+            GameObject pellet = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(pelletPrefab, gridParent);
+            pellet.transform.position = tile.position;
+            pellet.name = "Pellet_" + spawnCount;
+            pellet.layer = pelletLayerIndex;
+            spawnCount++;
+        }
+
+        Debug.Log($"Spawned {spawnCount} pellets on walkable tiles.");
+    }
+
+
+
+    [ContextMenu("Tag Tiles With Pellets")]
+    public void TagTilesWithPellets()
+    {
+        if (cachedChildren == null) CacheChildren();
 
         int pelletLayerIndex = LayerMask.NameToLayer(pelletLayerName);
         if (pelletLayerIndex == -1)
@@ -66,69 +152,43 @@ public class WallGizmoDrawer : MonoBehaviour
             return;
         }
 
-        int addedCount = 0;
-        foreach (Transform child in gridParent)
+        foreach (var tile in cachedChildren)
         {
-            if (child.name.Contains("Pellet"))
+            // Only check tiles (assuming walkable tiles are the ones that can have pellets)
+            if (tile.gameObject.layer != LayerMask.NameToLayer(walkableLayerName))
+                continue;
+
+            // Check if there's a normal pellet on top of this tile
+            Collider2D pelletOnTile = Physics2D.OverlapCircle(tile.position, checkRadius, pelletLayer);
+            if (pelletOnTile != null && !pelletOnTile.CompareTag("PowerPellet"))
             {
-                child.gameObject.layer = pelletLayerIndex;
-
-                foreach (Transform grandChild in child.GetComponentsInChildren<Transform>(true))
-                    grandChild.gameObject.layer = pelletLayerIndex;
-
-                BoxCollider2D collider = child.GetComponent<BoxCollider2D>();
-                if (collider == null)
-                {
-                    collider = child.gameObject.AddComponent<BoxCollider2D>();
-                    addedCount++;
-                }
-                collider.isTrigger = true;
+                tile.gameObject.tag = "PelletTile";
             }
+
         }
 
-
+        Debug.Log("Tiles with normal pellets have been tagged as 'PelletTile'.");
     }
 
 
-    [ContextMenu("Set Floor Tiles as Walkable")]
-    public void SetWalkableTiles()
-    {
-        if (gridParent == null) return;
-
-        int walkableLayerIndex = LayerMask.NameToLayer(walkableLayerName);
-        if (walkableLayerIndex == -1)
-        {
-            Debug.LogError($"Layer '{walkableLayerName}' does not exist!");
-            return;
-        }
-
-        foreach (Transform child in gridParent)
-        {
-            // Assume floor tiles are not walls or pellets
-            if (child.name.Contains("Floor"))
-            {
-                child.gameObject.layer = walkableLayerIndex;
-                foreach (Transform grandChild in child.GetComponentsInChildren<Transform>(true))
-                    grandChild.gameObject.layer = walkableLayerIndex;
-            }
-        }
-    }
-
+    // ------------------- Gizmos -------------------
     private void OnDrawGizmos()
     {
+        if (cachedChildren == null) CacheChildren();
+
         // Draw walls in red
         Gizmos.color = Color.red;
-        Collider2D[] walls = Object.FindObjectsByType<Collider2D>(FindObjectsSortMode.None);
-        foreach (var wall in walls)
+        int wallLayerIndex = LayerMask.NameToLayer(wallLayerName);
+        foreach (var child in cachedChildren)
         {
-            if (((1 << wall.gameObject.layer) & wallLayer) != 0)
-                Gizmos.DrawWireCube(wall.transform.position, gizmoSize);
+            if (child.gameObject.layer == wallLayerIndex)
+                Gizmos.DrawWireCube(child.position, gizmoSize);
         }
 
-        // Draw walkable tiles in semi-transparent green
+        // Draw walkable tiles in green
         Gizmos.color = new Color(0f, 1f, 0f, 0.3f);
         int walkableLayerIndex = LayerMask.NameToLayer(walkableLayerName);
-        foreach (Transform child in gridParent)
+        foreach (var child in cachedChildren)
         {
             if (child.gameObject.layer == walkableLayerIndex)
                 Gizmos.DrawCube(child.position, gizmoSize);

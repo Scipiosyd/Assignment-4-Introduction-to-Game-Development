@@ -135,11 +135,19 @@ public class CherryController : MonoBehaviour
         }
 
         currentCherry = Instantiate(cherryPrefab, startPos, Quaternion.identity);
-        
 
-      
 
-        
+        BoxCollider2D bc = currentCherry.GetComponent<BoxCollider2D>();
+        if (bc == null)
+        {
+            bc = currentCherry.AddComponent<BoxCollider2D>();
+        }
+        bc.enabled = true;
+        bc.isTrigger = true;
+
+
+
+
         SpriteRenderer sr = currentCherry.GetComponent<SpriteRenderer>();
         if (sr != null)
         {
@@ -202,4 +210,21 @@ public class CherryController : MonoBehaviour
             currentCherry = null;
         }
     }
+
+
+    public void ResetCherry()
+    {
+        if (currentCherry != null)
+        {
+            Destroy(currentCherry);
+            currentCherry = null;
+
+        }
+
+        cherryDestroyed = false;
+
+        StopAllCoroutines();
+        StartCoroutine(SpawnCherryRoutine());
+    }
+
 }

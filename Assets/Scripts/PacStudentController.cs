@@ -9,9 +9,11 @@ public class PacStudentController : MonoBehaviour
     public Tweener tweener;
 
     private Vector3 targetPos;
+    private Vector3 startingPos;
+    
     private bool isMoving = false;
-    private Rigidbody2D rb2D;
 
+    private Vector2Int startInput;
     private Vector2Int currentInput = Vector2Int.zero;
     private Vector2Int lastInput = Vector2Int.zero;
     [SerializeField]
@@ -43,6 +45,12 @@ public class PacStudentController : MonoBehaviour
     [SerializeField]
     private LayerMask pelletLayer;
 
+    [SerializeField]
+    private LayerMask cherryLayer;
+
+    [SerializeField]
+    private CherryController cherryController;
+
     //teleporter
 
     [SerializeField]
@@ -54,10 +62,33 @@ public class PacStudentController : MonoBehaviour
     public GameObject teleporter2;
 
 
+    //Ghosts (knights)
+    
+
+    [SerializeField]
+    private GhostController[] knights;
+
+    [SerializeField]
+    private LayerMask knightLayer;
+
+    [SerializeField]
+    private LevelController levelController;
+
+    private bool isDead;
+
+    //Counter
+
+
+
+    private Coroutine moveCoroutine;
+    private Coroutine wallEffectCoroutine;
+
     private void Awake()
     {
-        rb2D = GetComponent<Rigidbody2D>();
+        
         targetPos = transform.position;
+        startingPos = transform.position;
+        startInput = Vector2Int.zero;
     }
 
     private void Start()
@@ -125,13 +156,79 @@ public class PacStudentController : MonoBehaviour
 
         Collider2D pellethit = Physics2D.OverlapBox(newTarget, new Vector2(0.1f, 0.1f), 0f, pelletLayerMask);
 
+        int cherryLayerMask = LayerMask.GetMask("Cherry");
+        Collider2D cherryhit = Physics2D.OverlapBox(newTarget, new Vector2(1f,1f), 0f, cherryLayerMask);
+
+
+        int knightLayerMask = LayerMask.GetMask("Ghosts");
+        Collider2D knighthit = Physics2D.OverlapBox(newTarget, new Vector2(0.1f, 0.1f), 0f, knightLayerMask);
+
+
+
+        if(knighthit != null)
+        {
+            foreach (var knight in knights)
+            {
+                if (!knight.isScared())  
+                {
+                    
+                    isMoving = true;
+                    tweener.CancelTween(transform);
+
+                    
+                    foreach (var k in knights)
+                    {
+                        Animator knightAnimator = k.GetComponent<Animator>();
+                        if (knightAnimator != null)
+                            knightAnimator.speed = 0;
+                    }
+
+                 
+                    StartCoroutine(DeathScene(3f));
+
+                    
+                    return false;
+                }
+            }
+
+        }
+
+
 
         if (pellethit != null && !pellethit.CompareTag("PowerPellet")) {
 
-            
+            InGameCounterManager.instance.AddPoint(10);
                 Destroy(pellethit.gameObject);
             }
+
+        if(pellethit != null && pellethit.CompareTag("PowerPellet"))
+        {
+            InGameCounterManager.instance.AddPoint(50);
+            Destroy(pellethit.gameObject);
+
+            foreach (var knight in knights)
+            {
+
+                //if(knight ! dead)
+                knight.KnightScared();
+                
+            }
+
+           InGameCounterManager.instance.GhostTimer(10f);
+
+            
+        }
         
+
+        if(cherryhit != null)
+        {
+           
+            InGameCounterManager.instance.AddPoint(100);
+
+            cherryController.OnCherryDestroyed();
+
+            Destroy(cherryhit.gameObject);
+        }
         
         
         if (hit != null)
@@ -148,7 +245,7 @@ public class PacStudentController : MonoBehaviour
 
             else if ((collisionLayers.value & (1 << hitLayer)) != 0 && hitLayer == LayerMask.NameToLayer("Wall"))
             {
-                Debug.Log("HIT WALL at " + newTarget);
+                
                 wallEffect.transform.position = newTarget;
                 wallEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                 wallEffect.Play();
@@ -278,7 +375,64 @@ public class PacStudentController : MonoBehaviour
         wallEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
+    private IEnumerator DeathScene(float duration)
+{
+    if (isDead) yield break;
+    isDead = true;
 
+    animator.Play("bundead");
+    isMoving = true;
 
+    tweener.CancelTween(transform);
+    if (moveCoroutine != null) StopCoroutine(moveCoroutine);
+
+    yield return new WaitForSeconds(duration);
+
+    isMoving = false;
+
+    foreach (var knight in knights)
+    {
+        Animator knightAnimator = knight.GetComponent<Animator>();
+        if (knightAnimator != null)
+            knightAnimator.speed = 1;
+    }
+
+    lifecounter.instance.removeLife();
+    LevelController.Instance.ResetEverything();
+
+    isDead = false;
 }
+
+
+
+    public void ResetState()
+    {
+
+        isMoving = false;
+        tweener.CancelTween(transform);
+        transform.position = startingPos;
+        targetPos = startingPos;
+
+        currentInput = startInput;
+        lastInput = startInput;
+
+        animator.Play("bunright");
+
+        dustEffect.Stop();
+        audioSourcemoving.Pause();
+
+
+        if (moveCoroutine != null)
+        {
+            StopCoroutine(moveCoroutine);
+            moveCoroutine = null;
+        }
+
+        if (wallEffectCoroutine != null)
+        {
+            StopCoroutine(wallEffectCoroutine);
+            wallEffectCoroutine = null;
+        }
+    }
+ }
   
