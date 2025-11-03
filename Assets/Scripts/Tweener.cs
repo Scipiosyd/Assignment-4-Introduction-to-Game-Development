@@ -19,10 +19,10 @@ public class Tweener : MonoBehaviour
     {
         if (TweenExists(targetObject))
         {
-            // Already moving → don't add
+            
             return false;
         }
-        // Create a new tween and add it to the list
+        
         Tween newTween = new Tween(targetObject, startPos, endPos, Time.time, duration);
         activeTweens.Add(newTween);
         return true;

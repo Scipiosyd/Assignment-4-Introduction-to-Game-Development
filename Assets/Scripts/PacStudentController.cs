@@ -5,7 +5,7 @@ using UnityEngine;
 public class PacStudentController : MonoBehaviour
 {
     [Header("Movement Settings")]
-    public float moveDuration = 0.2f;      // Lerp duration for moving one tile
+    public float moveDuration = 0.2f;      
     public Tweener tweener;
 
     private Vector3 targetPos;
@@ -183,13 +183,13 @@ public class PacStudentController : MonoBehaviour
         if (knighthit != null)
         {
             GhostController hitKnight = knighthit.GetComponent<GhostController>();
-            if (hitKnight == null) return false; // safety
+            if (hitKnight == null) return false; 
 
             if (hitKnight.IsScared())
             {
-                // Knight is scared → go into dead state
+               
                 InGameCounterManager.instance.AddPoint(300);
-                hitKnight.KnightDead(); // start dead animation and logic
+                hitKnight.KnightDead(); 
             }
             else if(!hitKnight.IsScared() && !hitKnight.IsRecovering() && !hitKnight.IsDead())
             {

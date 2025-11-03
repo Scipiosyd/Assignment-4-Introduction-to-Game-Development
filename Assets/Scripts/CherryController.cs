@@ -4,16 +4,16 @@ using UnityEngine;
 public class CherryController : MonoBehaviour
 {
     [Header("Grid Map Settings")]
-    [SerializeField] private Grid grid; // Reference to your Grid component
-    [SerializeField] private bool useGridCoordinates = true; // Toggle to use grid or manual values
-    [SerializeField] private bool useSimpleBounds = false; // Use direct min/max values instead
+    [SerializeField] private Grid grid; 
+    [SerializeField] private bool useGridCoordinates = true; 
+    [SerializeField] private bool useSimpleBounds = false; 
 
-    // Simple bounds (easiest method)
+    
     [Header("Simple Bounds (if useSimpleBounds = true)")]
     [SerializeField] private Vector2 levelMinBounds = new Vector2(-10, -10);
     [SerializeField] private Vector2 levelMaxBounds = new Vector2(10, 10);
 
-    // Manual grid settings (used if grid is null or useGridCoordinates is false)
+    
     [Header("Manual Grid Settings")]
     public Vector2 mapOrigin = new Vector2(-4f, -4.15f);
     public int mapWidth = 28;
@@ -25,7 +25,7 @@ public class CherryController : MonoBehaviour
     [SerializeField] private float spawnDelay = 5f;
     [SerializeField] private float moveDuration = 5f;
     [SerializeField] private int cherrySortingOrder = 100;
-    [SerializeField] private float spawnOffset = 2f; // Distance outside bounds to spawn
+    [SerializeField] private float spawnOffset = 2f; 
 
     private Vector2 minBounds;
     private Vector2 maxBounds;

@@ -7,7 +7,7 @@ public class MapController : MonoBehaviour
     public static MapController Instance;
 
     [Header("Pellet Settings")]
-    public Transform gridParent;        // Parent holding all pellet objects
+    public Transform gridParent;        
     public string normalPelletTag = "Pellet";
     public string powerPelletTag = "PowerPellet";
 
@@ -18,8 +18,8 @@ public class MapController : MonoBehaviour
     private int remainingPowerPellets;
 
     [Header("Map Reset Settings")]
-    public GameObject mapPrefab; // Assign your original map prefab in inspector
-    private Transform currentMapInstance; // Track the current instantiated map
+    public GameObject mapPrefab; 
+    private Transform currentMapInstance; 
 
 
     private void Awake()
@@ -36,10 +36,7 @@ public class MapController : MonoBehaviour
         CountAllPelletsAtStart();
     }
 
-    /// <summary>
-    /// Counts all pellets in the scene under gridParent.
-    /// Separates normal pellets and power pellets.
-    /// </summary>
+    
     private void CountAllPelletsAtStart()
     {
         totalNormalPellets = 0;
@@ -54,10 +51,10 @@ public class MapController : MonoBehaviour
             if (child == gridParent) continue;
             if (!child.gameObject.activeInHierarchy) continue;
 
-            // Check if it's on the Pellet layer
+            
             if (child.gameObject.layer == pelletLayer)
             {
-                // If it has the PowerPellet tag, it's a power pellet
+                
                 if (child.gameObject.CompareTag(powerPelletTag))
                     totalPowerPellets++;
                 else
@@ -75,9 +72,7 @@ public class MapController : MonoBehaviour
 
     
 
-    /// <summary>
-    /// Call this when a normal pellet is eaten
-    /// </summary>
+  
     public void OnNormalPelletEaten()
     {
         remainingNormalPellets = Mathf.Max(0, remainingNormalPellets - 1);
@@ -85,9 +80,7 @@ public class MapController : MonoBehaviour
         CheckAllPelletsEaten();
     }
 
-    /// <summary>
-    /// Call this when a power pellet is eaten
-    /// </summary>
+   
     public void OnPowerPelletEaten()
     {
         remainingPowerPellets = Mathf.Max(0, remainingPowerPellets - 1);
@@ -95,9 +88,7 @@ public class MapController : MonoBehaviour
         CheckAllPelletsEaten();
     }
 
-    /// <summary>
-    /// Checks if all normal and power pellets are eaten
-    /// </summary>
+    
     private void CheckAllPelletsEaten()
     {
         if (remainingNormalPellets <= 0 && remainingPowerPellets <= 0)
@@ -109,10 +100,10 @@ public class MapController : MonoBehaviour
     private void OnAllPelletsEaten()
     {
         Debug.Log("All pellets eaten! Level complete!");
-        // Trigger win condition, animation, etc.
+       
     }
 
-    // Getter methods
+   
     public int GetRemainingNormalPellets() => remainingNormalPellets;
     public int GetRemainingPowerPellets() => remainingPowerPellets;
     public int GetTotalNormalPellets() => totalNormalPellets;
@@ -127,23 +118,23 @@ public class MapController : MonoBehaviour
             return;
         }
 
-        // Destroy the old map
+      
         if (currentMapInstance != null)
             Destroy(currentMapInstance.gameObject);
 
 
-        // Instantiate a new map
+      
         GameObject newMap = Instantiate(mapPrefab, Vector3.zero, Quaternion.identity);
         currentMapInstance = newMap.transform;
 
-        // Find the gridParent inside the new map (if your prefab has a child called "GridParent")
+        
         Transform newGridParent = currentMapInstance.Find("GridParent");
         if (newGridParent != null)
             gridParent = newGridParent;
         else
-            gridParent = currentMapInstance; // fallback
+            gridParent = currentMapInstance; 
 
-        // Reset pellets counts
+       
         CountAllPelletsAtStart();
 
         Debug.Log("Map restarted.");
