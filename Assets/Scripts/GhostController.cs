@@ -18,8 +18,54 @@ public class GhostController : MonoBehaviour
     private Coroutine scaredCoroutine;
     private Coroutine deadCoroutine;
 
-    
+    public Transform target;
+    public float speed = 1.0f;
+    Vector3[] path;
+    int targetIndex;
 
+
+    [SerializeField]
+    public AudioSource audioSourcescared;
+    [SerializeField]
+    public AudioSource audioSourcedead;
+
+
+    void Start()
+    {
+        GhostPathfinding.RequestPath(transform.position,target.position, OnPathFound);
+    }
+
+
+    public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
+    {
+        if (pathSuccessful)
+        {
+            path = newPath;
+            StopCoroutine("FollowPath");
+            StartCoroutine("FollowPath");
+        }
+    }
+
+    IEnumerator FollowPath()
+    {
+        Vector3 currentWaypoint = path[0];
+
+        while (true)
+        {
+            if (transform.position == currentWaypoint)
+            {
+                targetIndex++;
+                if (targetIndex >= path.Length)
+                {
+                    yield break;
+                }
+                currentWaypoint = path[targetIndex];
+            }
+
+            transform.position = Vector3.MoveTowards(transform.position, currentWaypoint, speed);
+            yield return null;
+        }
+    }
     public void Awake()
     {
         animator = GetComponent<Animator>();
@@ -45,6 +91,8 @@ public class GhostController : MonoBehaviour
 
     public void KnightScared()
     {
+
+
         if(scaredCoroutine != null)
         {
             StopCoroutine(scaredCoroutine);
@@ -85,6 +133,7 @@ public class GhostController : MonoBehaviour
 
     private IEnumerator ScaredTime()
     {
+        audioSourcescared.Play();
         currentState = KnightState.Scared;
         animator.Play("knightscared");
         yield return new WaitForSeconds(7f);
@@ -92,19 +141,21 @@ public class GhostController : MonoBehaviour
         currentState = KnightState.Recovering;
         animator.Play("knightrecovering");
         yield return new WaitForSeconds(3f);
-
+        audioSourcescared.Stop();
         currentState = KnightState.Normal;
         scaredCoroutine = null;
     }
 
     private IEnumerator DeadTime()
     {
+        audioSourcedead.Play();
         currentState = KnightState.Dead;
         animator.Play("knightdead");
         yield return new WaitForSeconds(3f);
 
         if(InGameCounterManager.instance.Knightscaredremainingtime <= 0)
         {
+            audioSourcedead.Stop();
             currentState = KnightState.Normal;
         }
 
@@ -112,7 +163,7 @@ public class GhostController : MonoBehaviour
         {
             currentState = KnightState.Recovering;
             yield return new WaitForSeconds(3f);
-
+            audioSourcedead.Stop();
             currentState = KnightState.Normal;
         }
 
@@ -135,10 +186,7 @@ public class GhostController : MonoBehaviour
 
 
     // Start is called before the first frame update
-    void Start()
-    {
-
-    }
+    
 
 
     public void knightRestartState()

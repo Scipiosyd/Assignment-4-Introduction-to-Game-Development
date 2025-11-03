@@ -14,9 +14,11 @@ public class SaveScore : MonoBehaviour
     }
 
     public Text scoreText;
+    public Text timerText;
     // Start is called before the first frame update
     public void saveScore()
     {
         PlayerPrefs.SetInt("HighScore", InGameCounterManager.instance.GetScore);
+        PlayerPrefs.SetString("timer", InGameCounterManager.instance.GetTimer);
     }
 }

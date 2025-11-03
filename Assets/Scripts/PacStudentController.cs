@@ -25,6 +25,9 @@ public class PacStudentController : MonoBehaviour
     [SerializeField]
     public AudioSource audioSourceeatingpellet;
 
+   
+
+
     [SerializeField]
     private ParticleSystem dustEffect;
 
@@ -214,6 +217,8 @@ public class PacStudentController : MonoBehaviour
 
             if (pellethit != null && !pellethit.CompareTag("PowerPellet")) {
 
+            audioSourceeatingpellet.Play();
+
             if (pelletcounter > 1)
             {
 
@@ -237,6 +242,7 @@ public class PacStudentController : MonoBehaviour
 
         if(pellethit != null && pellethit.CompareTag("PowerPellet"))
         {
+            audioSourceeatingpellet.Play();
             InGameCounterManager.instance.AddPoint(50);
             Destroy(pellethit.gameObject);
 

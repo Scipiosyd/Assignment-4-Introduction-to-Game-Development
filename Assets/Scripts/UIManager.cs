@@ -5,7 +5,11 @@ using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
+    [SerializeField]
+    public AudioSource buttonpress;
 
+    [SerializeField]
+    public AudioSource startscenemusic;
 
     public void Awake()
     {
@@ -14,22 +18,28 @@ public class UIManager : MonoBehaviour
 
     public void LoadFirstLevel()
     {
-        SceneManager.LoadScene(1);
+            startscenemusic.Stop();
+            buttonpress.Play();
+            SceneManager.LoadScene(1);
+        
     }
-
 
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        startscenemusic.loop = true;
+        startscenemusic.Play();
         
         
     }
 
+  
     // Update is called once per frame
     void Update()
     {
         
     }
 }
+
+

@@ -37,7 +37,7 @@ public class CounterManager : MonoBehaviour
         //milliseconds = Mathf.FloorToInt(milliseconds);
         //seconds = Mathf.FloorToInt(seconds);
         //minutes = Mathf.FloorToInt(minutes);
-        
+        timerFormat = PlayerPrefs.GetString("timer");
         timerText.text = "TIMER: " + timerFormat;
 
        
@@ -48,14 +48,7 @@ public class CounterManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        elapsedTime += Time.deltaTime;
-        int minutes = Mathf.FloorToInt(elapsedTime / 60);
-        int seconds = Mathf.FloorToInt(elapsedTime % 60);
-        int milliseconds = Mathf.FloorToInt((elapsedTime % 1f) * 1000f);
-        timerFormat = string.Format("{0:00}:{1:00}:{2:000}", minutes, seconds, milliseconds);
-        timerText.text = "TIME \n" + timerFormat;
-
-        
+      
 
 
     }

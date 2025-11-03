@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class InGameCounterManager : MonoBehaviour
@@ -23,6 +24,7 @@ public class InGameCounterManager : MonoBehaviour
 
 
     public int GetScore {  get { return score; } }
+    public string GetTimer { get { return timerFormat; } }
 
     public bool IsPaused { get; private set; } = false;
 
@@ -47,6 +49,8 @@ public class InGameCounterManager : MonoBehaviour
         get {  return knightscaredremaining; } 
 
     }
+
+
 
     private void Start()
     {
@@ -124,6 +128,12 @@ public class InGameCounterManager : MonoBehaviour
         ScaredtimerText.gameObject.SetActive(false);
     }
 
+
+    public void LoadStartScene()
+    {
+        SaveScore.Instance.saveScore();
+        SceneManager.LoadScene(0);
+    }
 
 
 
